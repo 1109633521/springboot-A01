@@ -11,6 +11,8 @@
     <groupId>com.example</groupId>
     <artifactId>springboot-A01</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <!-- 这里打成war包 若打jar，需将war改为jar -->
+    <packaging>war</packaging>
     <name>springboot-A01</name>
     <description>Demo project for Spring Boot</description>
     <properties>
@@ -47,7 +49,7 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>4.5.15</version>
+            <version>5.5.1</version>
         </dependency>
 
         <!-- 代码生成器 -->
@@ -61,6 +63,53 @@
             <artifactId>velocity</artifactId>
             <version>1.7</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-json</artifactId>
+        </dependency>
+
+        <!--swagger2配置-->
+        <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
+        <!--<dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        &lt;!&ndash; https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui &ndash;&gt;
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>3.0.0</version>
+        </dependency>-->
+
+        <!--swagger3-->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-boot-starter</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <!-- 引入swagger-ui-layer包 /docs.html-->
+        <dependency>
+            <groupId>com.github.caspar-chen</groupId>
+            <artifactId>swagger-ui-layer</artifactId>
+            <version>1.1.3</version>
+        </dependency>
+        <!-- 引入swagger-ui-layer包 /document.html-->
+        <dependency>
+            <groupId>com.zyplayer</groupId>
+            <artifactId>swagger-mg-ui</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+
+        <!-- JWT -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>3.10.3</version>
+        </dependency>
+
     </dependencies>
 
     <build>

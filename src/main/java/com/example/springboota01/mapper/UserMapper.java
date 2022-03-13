@@ -1,11 +1,19 @@
 package com.example.springboota01.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.springboota01.entity.User;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
+/**
+ * <p>
+ *  Mapper 接口
+ * </p>
+ *
+ * @author luoxu
+ * @since 2022-03-13
+ */
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
@@ -22,6 +30,7 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("select count(*) from sys_user where nickname like #{nickname}")
     Integer selectTotal(String nickname);
 
-/*    @Select("select * from sys_user where nickname like #{nickname} limit #{pageNum}, #{pageSize}")
-    List<User> selectPage(Integer pageNum, Integer pageSize, String nickname);*/
+    @Select("select * from sys_user where nickname like #{nickname} limit #{pageNum}, #{pageSize}")
+    List<User> selectPage(Integer pageNum, Integer pageSize, String nickname);
+
 }
