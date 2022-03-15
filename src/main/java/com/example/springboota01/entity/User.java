@@ -31,7 +31,7 @@ public class User implements Serializable {
       /**
      * id
      */
-      @JsonIgnore
+      //@JsonIgnore
       @TableId(value = "id", type = IdType.AUTO)
       @ApiModelProperty(value = "id",hidden = true)
       private Integer id;

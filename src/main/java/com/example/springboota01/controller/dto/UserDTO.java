@@ -11,6 +11,8 @@ import lombok.Data;
 @ApiModel("接收用户信息的实体类")
 public class UserDTO {
 
+    private Integer id;
+
     @ApiModelProperty("用户名")
     private String username;
 

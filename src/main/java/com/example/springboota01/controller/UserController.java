@@ -11,6 +11,7 @@ import com.example.springboota01.controller.dto.pageDTO.UserPageDTO;
 import com.example.springboota01.mapper.UserMapper;
 import com.example.springboota01.service.impl.UserServiceImpl;
 import io.swagger.annotations.*;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -145,8 +146,8 @@ public class UserController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id",value = "单个id",required = true)
     })
-    @PostMapping("/del/single")
-    public Boolean delete(@PathVariable Integer id){
+    @GetMapping("/del/single")
+    public Boolean delete(@RequestParam Integer id){
         return userService.removeById(id);
     }
 
