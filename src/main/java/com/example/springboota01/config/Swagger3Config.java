@@ -25,7 +25,6 @@ public class Swagger3Config {
     @Bean
     public Docket createRestApi() {
         return new Docket(DocumentationType.OAS_30)
-
                 .apiInfo(apiInfo())
                 .securitySchemes(Collections.singletonList(HttpAuthenticationScheme.JWT_BEARER_BUILDER
 //                        显示用
@@ -54,5 +53,4 @@ public class Swagger3Config {
                 .version("1.0")
                 .build();
     }
-
 }

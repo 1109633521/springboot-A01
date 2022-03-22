@@ -166,11 +166,11 @@ public class UserController {
     @ApiOperation("获取页面尺寸和页码进行分页查询（可选带入用户名称进行模糊查询）")
     @ApiResponses({
             @ApiResponse(code = 200,message = "查询成功"),
-            @ApiResponse(code = 400,message = "系统错误:页码和页面尺寸为非0值"),
+            @ApiResponse(code = 400,message = "系统错误:页码和页面尺寸要大于0"),
             @ApiResponse(code = 500,message = "查询不到数据")
     })
     public Result findPage(@RequestBody UserPageDTO uPage){
-        if(uPage.getPageNum()==0 || uPage.getPageSize()==0){
+        if(uPage.getPageNum()<1 || uPage.getPageSize()<1){
             return Result.error(Constants.CODE_400, "系统错误");
         }
         Integer pageNum = (uPage.getPageNum() - 1)* uPage.getPageSize();

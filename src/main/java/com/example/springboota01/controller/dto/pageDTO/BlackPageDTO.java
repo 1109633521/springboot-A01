@@ -1,20 +1,20 @@
 package com.example.springboota01.controller.dto.pageDTO;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
-@ApiModel
-public class CarPageDTO {
+public class BlackPageDTO {
     @ApiModelProperty(value = "页码（第几页）")
     private Integer pageNum;
     @ApiModelProperty(value = "页面大小")
     private Integer pageSize;
     @ApiModelProperty(value = "车牌号")
     private String number;
-    @ApiModelProperty(value = "车型")
-    private String type;
-    @ApiModelProperty(value = "颜色")
-    private String color;
+    @ApiModelProperty(value = "起始时间-Localdatetime类,yyyy-MM-dd HH:mm:ss类型")
+    private LocalDateTime beginTime;
+    @ApiModelProperty(value = "终结时间-")
+    private LocalDateTime endTime;
 }

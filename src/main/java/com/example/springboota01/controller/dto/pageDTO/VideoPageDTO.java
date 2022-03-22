@@ -1,5 +1,7 @@
 package com.example.springboota01.controller.dto.pageDTO;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,5 +14,5 @@ public class VideoPageDTO {
     @ApiModelProperty(value = "页面大小")
     private Integer pageSize;
     @ApiModelProperty(value = "路段名",required = false)
-    private String crossName = "";
+    private String name;
 }
