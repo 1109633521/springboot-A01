@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springboota01.mapper.ConfirmationMapper">
+    <!--根据user进行查询，动态SQL if标签-->
+    <!--当参数内有值时才作为查询条件-->
+    <resultMap id="confirmDTO" type="com.example.springboota01.controller.dto.ConfirmDTO">
+        <id column="confirmation_id" property="confirmationId" />
+        <result column="incident_id" property="incidentId" />
+        <result column="car_id" property="carId" />
+        <result column="camera_id" property="cameraId" />
+        <result column="camera_number" property="cameraNumber" />
+        <result column="type" property="type" />
+        <result column="name" property="name" />
+        <result column="confirm_time" property="confirmTime" />
+        <result column="number" property="number" />
+        <result column="is_confirm" property="isConfirm" />
+        <result column="time" property="createTime" />
+        <result column="user_name" property="userName" />
+        <result column="context" property="context" />
+    </resultMap>
+    <select id="findPage" resultMap="confirmDTO" parameterType="com.example.springboota01.controller.dto.pageDTO.ConfirmPageDTO">
+        select distinct confirmation_id,incident_id,car_id,camera_number,incident.type,camera_id,`cross`.`name`,
+               confirm_time,car.number,is_confirm,incident.time,user_name,context
+        from ((confirmation natural join incident) JOIN car using(car_id))
+            join (camera NATURAL join `cross`) using (camera_id),sys_user
+        <!--动态添加where关键字-->
+        <where>
+            <if test="isConfirm!=null">
+                and confirmation.is_confirm = #{isConfirm}
+            </if>
+            <if test="beginTime!=null and endTime!=null">
+                and incident.time between &apos;${beginTime}&apos; and &apos;${endTime}&apos;
+            </if>
+        </where>
+        order by incident.time desc limit #{pageNum},#{pageSize}
+    </select>
+
+    <select id="findTotal" resultType="Integer"
+            parameterType="com.example.springboota01.controller.dto.pageDTO.ConfirmPageDTO">
+        select distinct COUNT(DISTINCT confirmation_id)
+        from ((confirmation natural join incident) JOIN car using(car_id))
+        join (camera NATURAL join `cross`) using (camera_id),sys_user
+        <!--动态添加where关键字-->
+        <where>
+            <if test="isConfirm != null">
+                and confirmation.is_confirm = #{isConfirm}
+            </if>
+            <if test="beginTime != null and endTime != null">
+                and incident.time between  &apos;${beginTime}&apos; and  &apos;${endTime}&apos;
+            </if>
+        </where>
+    </select>
+</mapper>
