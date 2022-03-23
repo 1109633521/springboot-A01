@@ -12,6 +12,7 @@ public class VideoDTO {
     @JsonIgnore
     private Integer crossId;
     private Integer videoId;
+    private String url;
     private LocalTime length;
     private LocalDateTime time;
     private Integer camera_number;

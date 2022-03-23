@@ -15,4 +15,14 @@ public class VideoPageDTO {
     private Integer pageSize;
     @ApiModelProperty(value = "路段名",required = false)
     private String name;
+
+    public VideoPageDTO(Integer pageNum, Integer pageSize, String name) {
+        this.pageNum = pageNum;
+        this.pageSize = pageSize;
+        this.name = name;
+    }
+
+    public VideoPageDTO(String name) {
+        this.name = name;
+    }
 }

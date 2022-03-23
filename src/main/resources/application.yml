@@ -14,6 +14,14 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 500MB
+files:
+  upload:
+    path: C:/Environment/file_a01/
+    address: 10.99.103.0
 
 # mybatis
 mybatis:
