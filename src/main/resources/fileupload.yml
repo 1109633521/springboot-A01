@@ -1,0 +1,5 @@
+files:
+  upload:
+    path_video: C:/Environment/file_a01/video/
+    path_image: C:/Environment/file_a01/image/
+    path_fragment: C:/Environment/file_a01/fragment/

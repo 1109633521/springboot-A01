@@ -17,7 +17,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-  @TableName("cross")
+@TableName("cross")
 public class Cross implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -32,6 +32,6 @@ public class Cross implements Serializable {
      * 名称
      */
       private String name;
-
-
+      private Double centerLng;
+      private Double centerLat;
 }

@@ -1,8 +1,9 @@
 package com.example.springboota01.controller;
 
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.springboota01.common.Constants;
 import com.example.springboota01.common.Result;
@@ -11,20 +12,21 @@ import com.example.springboota01.controller.dto.pageDTO.UserPageDTO;
 import com.example.springboota01.mapper.UserMapper;
 import com.example.springboota01.service.impl.UserServiceImpl;
 import io.swagger.annotations.*;
-import org.apache.ibatis.annotations.Delete;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import com.example.springboota01.entity.User;
 
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags="user类控制器：用户管理")
 @RestController
 @RequestMapping("/user")
+@Transactional
 public class UserController {
 
     @Autowired
@@ -86,6 +89,29 @@ public class UserController {
         }
     }
 
+    @GetMapping("/getNowUser")
+    @ApiOperation("根据token获取当前用户信息")
+    @ApiResponses({
+            @ApiResponse(code = 200,message = "获取成功"),
+            @ApiResponse(code = 401,message = "token验证有误"),
+            @ApiResponse(code = 500,message = "用户不存在")
+    })
+    public Result getNowUser(HttpServletRequest request){
+        String token = request.getHeader("token");
+        String userId;
+        try {
+            userId = JWT.decode(token).getAudience().get(0);
+        } catch (JWTDecodeException j) {
+            return Result.error(Constants.CODE_401,"token验证失败，请重新登录");
+        }
+        // 根据token中的userid查询数据库
+        User user = userService.getById(userId);
+        if (user == null) {
+            return Result.error(Constants.CODE_500,"用户不存在，请重新登录");
+        }
+        return Result.success(Constants.CODE_200,"获取成功",user);
+    }
+
     @PostMapping("/save")
     @ApiOperation("添加用户")
     @ApiResponses({
@@ -117,13 +143,13 @@ public class UserController {
         user.setChangeTime(LocalDateTime.now());
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", user.getUsername());
-        queryWrapper.eq("password", user.getPassword());
         User one = userService.getOne(queryWrapper);
         if(one==null){
             return Result.error(Constants.CODE_500,"用户名不存在");
         }
         UpdateWrapper<User> updateWrapper=new UpdateWrapper<>();
         updateWrapper.eq("id",one.getId());
+        if(user.getPassword()!=null){ one.setPassword(user.getPassword());}
         if(user.getNickname()!=null) {one.setNickname(user.getNickname());}
         if(user.getAddress()!=null) {one.setAddress(user.getAddress());}
         if(user.getEmail()!=null) {one.setEmail(user.getEmail());}
@@ -195,6 +221,38 @@ public class UserController {
         //queryWrapper.like("username",username);  多条模糊查询，mp自动加 and
         return userService.page(page,queryWrapper);
     }*/
+
+    @GetMapping("/getMsg")
+    public Result getMsg(@RequestParam String str){
+        System.out.println();
+        System.out.println(str);
+        System.out.println();
+        return Result.success(Constants.CODE_200,"嗨害嗨",str);
+    }
+
+    @PostMapping("/postTest")
+    public Result postTest(@RequestBody Flask flask){
+        Set<String> keySet = flask.getReverse().keySet();
+        Iterator<String> im = keySet.iterator();
+        while(im.hasNext()){
+            String key = im.next();
+            //通过key获取对应的value
+            List<String> list = flask.getReverse().get(key);
+            for (String str : list) {
+                System.out.println(str);
+            }
+        }
+        return Result.success(Constants.CODE_200,"嗨害嗨");
+    }
+}
+
+@Data
+class Flask{
+    private Map<String,List<String>> overspeed;
+    private Map<String,List<String>> car_break_red;
+    private Map<String,List<String>> online;
+    private Map<String,List<String>> pedestrian_red;
+    private Map<String,List<String>> reverse;
 }
 
 

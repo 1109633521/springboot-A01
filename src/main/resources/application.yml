@@ -1,6 +1,7 @@
 server:
   port: 9090
 
+
 mconfig:
   swagger-ui-open: true
 
@@ -18,10 +19,6 @@ spring:
     multipart:
       max-file-size: 100MB
       max-request-size: 500MB
-files:
-  upload:
-    path: C:/Environment/file_a01/
-    address: 10.99.103.0
 
 # mybatis
 mybatis:
@@ -36,4 +33,7 @@ mybatis:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印sql
+
+
+
 

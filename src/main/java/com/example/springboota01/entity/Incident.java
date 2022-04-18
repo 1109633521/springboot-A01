@@ -48,4 +48,14 @@ public class Incident implements Serializable {
      * 事件发生时间
      */
       private LocalDateTime time;
+
+    public Incident(String type, Integer cameraId, Integer carId, LocalDateTime time) {
+        this.type = type;
+        this.cameraId = cameraId;
+        this.carId = carId;
+        this.time = time;
+    }
+
+    public Incident() {
+    }
 }

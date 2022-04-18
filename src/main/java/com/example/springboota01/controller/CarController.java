@@ -6,11 +6,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springboota01.common.Constants;
 import com.example.springboota01.common.Result;
 import com.example.springboota01.controller.dto.pageDTO.CarPageDTO;
+import com.example.springboota01.controller.vo.CarData;
+import com.example.springboota01.controller.vo.CarTypeData;
 import com.example.springboota01.entity.User;
 import com.example.springboota01.mapper.CarMapper;
 import io.swagger.annotations.*;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags="car类控制器：车辆管理")
 @RestController
 @RequestMapping("/car")
+@Transactional
 public class CarController {
 
     @Resource
@@ -127,6 +133,33 @@ public class CarController {
         }
         res.put("data",data);
         return Result.success(Constants.CODE_200,"查询成功",res);
+    }
+
+    @GetMapping("/carData")
+    @ApiOperation("首页车辆信息")
+    @Transactional
+    public Result carData(String number){
+        CarData carData = carMapper.getCarData(number);
+        if(carData == null){
+            Car car = new Car();
+            car.setNumber(number);
+            car.setColor("黑色");
+            car.setType("小型车");
+            carService.save(car);
+            CarData carData1 = carMapper.getCarData(number);
+            return Result.success(Constants.CODE_200,"添加成功",carData1);
+        }
+        return Result.success(Constants.CODE_200,"查询成功",carData);
+    }
+
+    @GetMapping("/carTypeData")
+    @ApiOperation("首页车型统计信息")
+    public Result carTypeData(Integer cameraId){
+        List<CarTypeData> carTypeData = carMapper.getCarTypeData(cameraId);
+        if(carTypeData.size() == 0){
+            return Result.error(Constants.CODE_400,"查询不到数据");
+        }
+        return Result.success(Constants.CODE_200,"查询成功",carTypeData);
     }
 }
 

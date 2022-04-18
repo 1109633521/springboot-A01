@@ -44,5 +44,12 @@ public class Catch implements Serializable {
      */
       private LocalDateTime catchTime;
 
+  public Catch(Integer cameraId, Integer carId, LocalDateTime catchTime) {
+    this.cameraId = cameraId;
+    this.carId = carId;
+    this.catchTime = catchTime;
+  }
 
+  public Catch() {
+  }
 }

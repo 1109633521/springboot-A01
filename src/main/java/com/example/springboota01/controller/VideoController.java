@@ -1,52 +1,43 @@
 package com.example.springboota01.controller;
 
-
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
-import com.baomidou.mybatisplus.core.assist.ISqlRunner;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.springboota01.common.Constants;
 import com.example.springboota01.common.Result;
 import com.example.springboota01.controller.dto.VideoDTO;
 import com.example.springboota01.controller.dto.pageDTO.VideoPageDTO;
+import com.example.springboota01.controller.vo.CarAndPerson;
+import com.example.springboota01.controller.vo.CarTypeData;
+import com.example.springboota01.controller.vo.Counter;
+import com.example.springboota01.controller.vo.CrossData;
 import com.example.springboota01.entity.*;
-import com.example.springboota01.mapper.CameraMapper;
-import com.example.springboota01.mapper.CrossMapper;
-import com.example.springboota01.mapper.FilesMapper;
-import com.example.springboota01.mapper.VideoMapper;
+import com.example.springboota01.mapper.*;
 import com.example.springboota01.service.ICameraService;
 import com.example.springboota01.service.IFilesService;
-import com.example.springboota01.service.impl.CrossServiceImpl;
 import com.example.springboota01.utils.VideoUtil;
 import io.swagger.annotations.*;
 import lombok.Data;
 import org.apache.tomcat.jni.Local;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StreamUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import com.example.springboota01.service.IVideoService;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import ws.schild.jave.*;
 
 /**
  * <p>
@@ -56,11 +47,16 @@ import org.springframework.web.multipart.MultipartFile;
  * @author luoxu
  * @since 2022-03-11
  */
+enum IncidentType
+{
+    wu,overspeed, car_break_red, online, pedestrian_red, reverse, pdestrian_blocked, wrong_way, turn_round, illegal_park;
+}
 @Api(tags="video类控制器：路段管理")
 @RestController
 @RequestMapping("/video")
+@Transactional
 public class VideoController {
-    @Value("${files.upload.path}")
+    @Value("${files.upload.path_video}")
     private String fileUploadPath;
 
     @Resource
@@ -82,6 +78,9 @@ public class VideoController {
     private CrossMapper crossMapper;
 
     @Resource
+    private CarMapper carMapper;
+
+    @Resource
     private FilesMapper filesMapper;
 
     // 根据id删除
@@ -92,21 +91,20 @@ public class VideoController {
     @GetMapping("/del/single")
     public Result delete(@RequestParam Integer id) {
         Video video = videoMapper.selectById(id);
-        if(video == null){
-            return Result.error(Constants.CODE_500,"没有对应id的视频资源，删除失败");
+        if (video == null) {
+            return Result.error(Constants.CODE_500, "没有对应id的视频资源，删除失败");
         }
-        Files files = filesMapper.selectOne(new QueryWrapper<Files>().eq("url",video.getUrl()));
-        if(files == null){
+        Files files = filesMapper.selectOne(new QueryWrapper<Files>().eq("url", video.getUrl()));
+        if (files == null) {
             videoMapper.deleteById(video);
-            return Result.success(Constants.CODE_200,"视频资源对应文件已不存在，video已删除");
+            return Result.success(Constants.CODE_200, "视频资源对应文件已不存在，video已删除");
         }
-        if(delFile(video.getUrl()) == false){
-            return Result.error(Constants.CODE_400,"系统错误，没有找到资源文件");
+        if (filesService.delFile(video.getUrl(),fileUploadPath) == false) {
+            return Result.error(Constants.CODE_400, "系统错误，没有找到资源文件");
         }
-        cameraMapper.deleteById(video.getCameraId());
         videoMapper.deleteById(video);
         filesMapper.deleteById(files);
-        return Result.success(Constants.CODE_200,"删除成功");
+        return Result.success(Constants.CODE_200, "删除成功");
     }
 
     // 根据id批量删除
@@ -128,7 +126,7 @@ public class VideoController {
         }
         List<Files> filesList = filesMapper.selectBatchIds(fileIds);
         for(Files i:filesList){
-            delFile(i.getUrl());
+            filesService.delFile(i.getUrl(),fileUploadPath);
         }
         if (videoService.removeByIds(ids) == true
                 && filesService.removeByIds(fileIds)
@@ -170,37 +168,13 @@ public class VideoController {
         return Result.success(Constants.CODE_200, "查询成功", res);
     }
 
-    @GetMapping("/play/{fileUUID}")
+    @GetMapping("/show/{fileUUID}")
     @ApiOperation("进行视频播放")
-    public Result playVideo(@PathVariable String fileUUID, HttpServletResponse response) throws IOException {
-        // 根据文件的唯一标识码获取文件
-        File file = new File(fileUploadPath + fileUUID);
-        try {
-            // 设置输出流的格式
-            FileInputStream inputStream = new FileInputStream(file);
-            byte[] data = new byte[inputStream.available()];
-            inputStream.read(data);
-            String diskfilename = "final.mp4";
-            response.setContentType("video/mp4");
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + diskfilename + "\"");
-            System.out.println("data.length " + data.length);
-            response.setContentLength(data.length);
-            response.setHeader("Content-Range", "" + Integer.valueOf(data.length - 1));
-            response.setHeader("Accept-Ranges", "bytes");
-            response.setHeader("Etag", "W/\"9767057-1323779115364\"");
-            OutputStream os = response.getOutputStream();
-            os.write(data);
-            //先声明的流后关掉！
-            os.flush();
-            os.close();
-            inputStream.close();
-        } catch (Exception e) {
-
-        }
-        return Result.success(Constants.CODE_200, "播放成功");
+    public void showVideo(@PathVariable String fileUUID, HttpServletResponse response) throws IOException {
+        filesService.showVideo(fileUUID,response,fileUploadPath);
     }
 
-    @PostMapping("/getCameraId")
+    @GetMapping("/getCameraId")
     @ApiOperation("获取路段以及摄像头编号对应 摄像头id")
     @ApiResponses({
             @ApiResponse(code = 200,message = "获取成功"),
@@ -208,9 +182,7 @@ public class VideoController {
     })
     public Result getCameraId(@RequestParam String name,
                               @RequestParam Integer cameraNumber){
-        QueryWrapper<Cross> queryCross = new QueryWrapper<>();
-        queryCross.eq("name",name);
-        Cross cross = crossMapper.selectOne(queryCross);
+        Cross cross = crossMapper.getByName(name);
         if(cross == null){
             return Result.error(Constants.CODE_500,"没有对应路段");
         }
@@ -226,24 +198,46 @@ public class VideoController {
         }
     }
 
-    @PostMapping("/upload")
-    @ApiOperation("保存视频文件，生成video类视频信息与文件信息，需要传入路段名和视频文件")
+    @GetMapping("/getUrl")
+    @ApiOperation("获取路段以及摄像头编号对应 摄像头id")
     @ApiResponses({
-            @ApiResponse(code = 200,message = "存储成功"),
-            @ApiResponse(code = 400,message = "存储失败，系统错误"),
-            @ApiResponse(code = 500,message = "没有对应路段")
+            @ApiResponse(code = 200,message = "获取成功"),
+            @ApiResponse(code = 500,message = "没有对应路段 或 没有对应摄像头")
     })
-    public Result upload(@RequestParam MultipartFile file,
-                         @RequestParam String name){
-        //Cross cross = crossMapper.selectOne(new QueryWrapper<Cross>().eq("name",name));
+    public Result getUrl(@RequestParam String name,
+                              @RequestParam Integer cameraNumber){
         Cross cross = crossMapper.getByName(name);
         if(cross == null){
             return Result.error(Constants.CODE_500,"没有对应路段");
         }
+        QueryWrapper<Camera> queryCamera = new QueryWrapper<>();
+        queryCamera.eq("cross_id",cross.getCrossId());
+        queryCamera.eq("camera_number",cameraNumber);
+        Camera camera = cameraMapper.selectOne(queryCamera);
+        if(camera == null){
+            return Result.error(Constants.CODE_500,"没有对应摄像头");
+        }
+        Video video = videoService.getOne(new QueryWrapper<Video>().eq("camera_id",camera.getCameraId()));
+        if(video == null){
+            return Result.error(Constants.CODE_500,"没有对应视频数据");
+        }
+        else{
+            return Result.success(Constants.CODE_200,"获取成功",video.getUrl());
+        }
+    }
+
+    @PostMapping("/upload")
+    @Transactional
+    public Result upload(@RequestParam MultipartFile file,
+                         @RequestParam Integer cameraId){
+        Video oldVideo = videoService.getOne(new QueryWrapper<Video>().eq("camera_id",cameraId));
+        if(oldVideo != null){
+            delete(oldVideo.getVideoId());
+        }
         //保存文件获取url
         String url = new String();
         try {
-            url = filesService.upload(file);
+            url = filesService.uploadVideo(file,fileUploadPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -253,20 +247,14 @@ public class VideoController {
         QueryWrapper<Files> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("url",url);
         Files files = filesMapper.selectOne(queryWrapper);
-        //生成新摄像头并获取id
-        Integer number = cameraMapper.getNumber(cross.getCrossId());
-        if(number == null){
-            number = 0;
+        //获取摄像头id
+        if(cameraService.getById(cameraId)==null){
+            return Result.error(Constants.CODE_400,"不存在摄像头");
         }
-        Camera camera = new Camera(number + 1 ,cross.getCrossId());
-        cameraMapper.insert(camera);
-        Integer cId = (cameraMapper.selectOne(new QueryWrapper<Camera>()
-                .eq("camera_number",camera.getCameraNumber())
-        .eq("cross_id",camera.getCrossId()))).getCameraId();
         //设置video属性
         Video video = new Video();
         video.setLength(getTime(file));
-        video.setCameraId(cId);
+        video.setCameraId(cameraId);
         video.setUrl(files.getUrl());
         videoService.save(video);
         return Result.success(Constants.CODE_200,"存储成功",url);
@@ -314,6 +302,108 @@ public class VideoController {
         return Result.success(Constants.CODE_200, "查询成功", res);
     }
 
+
+    @ApiOperation("获取一条视频流量统计信息")
+    @GetMapping("/data")
+    public Result videoData(@RequestParam Integer cameraId){
+        Video video = videoService.getOne(new QueryWrapper<Video>().eq("camera_id",cameraId));
+        if(video == null){
+            return Result.error(Constants.CODE_400,"查询不到数据");
+        }
+        return Result.success(Constants.CODE_200,"查询成功",video);
+    }
+
+    @ApiOperation("获取路段流量统计信息")
+    @GetMapping("/crossData")
+    public Result crossData(@RequestParam String name,
+                            @RequestParam String begin,
+                            @RequestParam String end){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime beginTime = LocalDateTime.parse(begin, formatter);
+        LocalDateTime endTime = LocalDateTime.parse(end,formatter);
+        CrossData crossData = videoMapper.getCrossData(name,beginTime,endTime);
+        if(crossData == null){
+            return Result.error(Constants.CODE_400,"查询不到数据");
+        }
+        return Result.success(Constants.CODE_200,"查询成功",crossData);
+    }
+
+    @ApiOperation("获取交通工具流量变化趋势信息信息")
+    @GetMapping("/crossFlowData")
+    public Result crossFlowData(@RequestParam String name,
+                            @RequestParam String begin,
+                            @RequestParam String end){
+        /*if (name == null){
+            name = "";
+        }*/
+        LocalDateTime beginTime;
+        LocalDateTime endTime;
+        if(end == ""||begin==""){
+            endTime = LocalDateTime.now();
+            beginTime = endTime.minusDays(7);
+        }else {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            beginTime = LocalDateTime.parse(begin, formatter);
+            endTime = LocalDateTime.parse(end, formatter);
+        }
+        //时间间隔获取
+        Duration duration = Duration.between(beginTime, endTime);
+        System.out.println(duration.getSeconds());
+        List<Counter> data1 = new ArrayList<>();
+        List<CarAndPerson> data2 = new ArrayList<>();
+        LocalDateTime time1 = beginTime;
+        LocalDateTime time2 = beginTime;
+        for(int i=0;i<7;i++){
+            time2 = time2.plusSeconds(duration.getSeconds()/7);
+            System.out.println(time1.toString() + time2.toString());
+            if(videoMapper.getFlowData(name,time1,time2)!=null) {
+                data1.add(videoMapper.getFlowData(name, time1, time2));
+            }else{
+                data1.add(new Counter(0,0,0,0,0));
+            }
+            data2.add(new CarAndPerson(data1.get(i).getBus()+data1.get(i).getCar()
+                    +data1.get(i).getMotorcycle()+data1.get(i).getTruck(),data1.get(i).getPerson()));
+            time1 = time1.plusSeconds(duration.getSeconds()/7);
+        }
+        Map<String,Object> res = new HashMap<>();
+        res.put("data1",data1);
+        res.put("data2",data2);
+        return Result.success(Constants.CODE_200,"查询成功",res);
+    }
+
+    @ApiOperation("获取路段最后一段视频url")
+    @GetMapping("/crossVideo")
+    public Result getCrossVideo(@RequestParam Integer crossId){
+        String url = videoMapper.getCrossVideo(crossId);
+        if(url == null){
+            return Result.error(Constants.CODE_400,"查询不到数据");
+        }
+        return Result.success(Constants.CODE_200,"查询成功",url);
+    }
+
+    @GetMapping("/carTypeData")
+    @ApiOperation("首页车型统计信息")
+    public Result carTypeData(Integer cameraId){
+        List<CarTypeData> carTypeData = new ArrayList<>();
+        Counter counter = videoMapper.getCarTypeData(cameraId);
+        if(counter == null){
+            carTypeData.add(new CarTypeData(1,"truck",0));
+            carTypeData.add(new CarTypeData(3,"car",0));
+            carTypeData.add(new CarTypeData(4,"bus",0));
+            carTypeData.add(new CarTypeData(5,"motorcycle",0));
+        }else{
+            carTypeData.add(new CarTypeData("car",counter.getCar()));
+            carTypeData.add(new CarTypeData("truck",counter.getTruck()));
+            carTypeData.add(new CarTypeData("bus",counter.getBus()));
+            carTypeData.add(new CarTypeData("motorcycle",counter.getMotorcycle()));
+            carTypeData.sort(Comparator.comparing(CarTypeData::getCount).reversed());
+            for(int i=0;i<carTypeData.size();i++){
+                carTypeData.get(i).setId(i+1);
+            }
+        }
+        return Result.success(Constants.CODE_200,"查询成功",carTypeData);
+    }
+
     //获取视频时间
     private LocalTime getTime(MultipartFile file){
         String duration = VideoUtil.ReadVideoTimeMs(file);
@@ -321,16 +411,6 @@ public class VideoController {
         return LocalTime.of(Integer.parseInt(str[0]),
                 Integer.parseInt(str[1]),
                 Integer.parseInt(str[2]));
-    }
-
-    private boolean delFile(String url){
-        File delFile = new File(fileUploadPath+url);
-        if(delFile.isFile() && delFile.exists()) {
-            delFile.delete();
-            return true;
-        }else {
-            return false;
-        }
     }
 }
 
@@ -345,3 +425,4 @@ class CrossGroup{
         this.cameraList = cameraList;
     }
 }
+

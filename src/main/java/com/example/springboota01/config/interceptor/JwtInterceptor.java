@@ -27,7 +27,7 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String token = request.getHeader("token");
+        /*String token = request.getHeader("token");
         // 如果不是映射到方法直接通过
         if(!(handler instanceof HandlerMethod)){
             return true;
@@ -54,7 +54,7 @@ public class JwtInterceptor implements HandlerInterceptor {
             jwtVerifier.verify(token); // 验证token
         } catch (JWTVerificationException e) {
             throw new ServiceException(Constants.CODE_401, "token验证失败，请重新登录");
-        }
+        }*/
         return true;
     }
 }

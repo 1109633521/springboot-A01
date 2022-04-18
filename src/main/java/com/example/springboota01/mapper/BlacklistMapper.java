@@ -21,13 +21,17 @@ import java.util.List;
 public interface BlacklistMapper extends BaseMapper<Blacklist> {
     @Select("select * " +
             "from car natural join blacklist " +
-            "where number like #{number} limit #{pageNum}, #{pageSize}")
+            "where number like #{number} " +
+            "order by time desc " +
+            "limit #{pageNum}, #{pageSize}")
     List<BlacklistDTO> selectPage(Integer pageNum, Integer pageSize, String number);
 
     @Select("select * " +
             "from car natural join blacklist " +
             "where number like #{number} and " +
-            "(time BETWEEN #{beginTime} AND #{endTime}) limit #{pageNum}, #{pageSize}")
+            "(time BETWEEN #{beginTime} AND #{endTime}) " +
+            "order by time desc " +
+            "limit #{pageNum}, #{pageSize}")
     List<BlacklistDTO> selectTimePage(Integer pageNum, Integer pageSize, String number, LocalDateTime beginTime, LocalDateTime endTime);
 
     @Select("select count(*) from car natural join blacklist " +

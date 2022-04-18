@@ -6,8 +6,12 @@ import com.example.springboota01.common.Constants;
 import com.example.springboota01.common.Result;
 import com.example.springboota01.controller.dto.IncidentDTO;
 import com.example.springboota01.controller.dto.pageDTO.ConfirmPageDTO;
+import com.example.springboota01.controller.vo.CrossCount;
+import com.example.springboota01.controller.vo.TypeCount;
 import com.example.springboota01.mapper.IncidentMapper;
 import io.swagger.annotations.*;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -32,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/incident")
 @Api(tags="incident控制类：违章事件管理")
+@Transactional
 public class IncidentController {
     @Resource
     private IIncidentService incidentService;
@@ -47,7 +52,7 @@ public class IncidentController {
             @ApiResponse(code = 500,message = "查询不到结果")
     })
     public Result findLatest() {
-        Integer pageNum = 1;
+        Integer pageNum = 0;
         Integer pageSize = 5;
         List<IncidentDTO> data = incidentMapper.findLatest(pageNum,pageSize);
         Integer total = incidentMapper.getTotal();
@@ -59,6 +64,28 @@ public class IncidentController {
         res.put("total",total);
         return Result.success(Constants.CODE_200,"查询成功",res);
     }
+
+    @GetMapping("/crossCount")
+    @ApiOperation("路段违章频次统计")
+    public Result crossCount(){
+        List<CrossCount> crossCounts = incidentMapper.getCrossCount();
+        if(crossCounts.size() == 0){
+            return Result.error(Constants.CODE_400,"无数据");
+        }
+        return Result.success(Constants.CODE_200,"查询成功",crossCounts);
+    }
+
+    @GetMapping("/typeCount")
+    @ApiOperation("违章类型频次统计+排名")
+    public Result typeCount(){
+        List<TypeCount> typeCounts = incidentMapper.getTypeCount();
+        if(typeCounts.size() == 0){
+            return Result.error(Constants.CODE_400,"无数据");
+        }
+        return Result.success(Constants.CODE_200,"查询成功",typeCounts);
+    }
+
+
 }
 
 

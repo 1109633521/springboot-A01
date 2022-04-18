@@ -14,6 +14,8 @@ import com.example.springboota01.mapper.FilesMapper;
 import io.swagger.annotations.Api;
 import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +34,7 @@ import java.util.List;
  */
 @RequestMapping("/files")
 /*@Api(tags="files类：文件管理")*/
+@Transactional
 public class FilesController {
 
     @Value("${files.upload.path}")

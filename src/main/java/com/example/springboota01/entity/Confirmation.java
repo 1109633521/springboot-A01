@@ -56,4 +56,13 @@ public class Confirmation implements Serializable {
       private String userName;
 
       private Boolean isConfirm;
+
+      private Boolean isDeal;
+
+  public Confirmation(Integer incidentId) {
+    this.incidentId = incidentId;
+  }
+
+  public Confirmation() {
+  }
 }

@@ -1,45 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.springboota01.mapper.VideoMapper">
-    <resultMap id="videoDTO" type="com.example.springboota01.controller.dto.VideoDTO">
-        <id column="video_id" property="videoId"/>
-        <result column="camera_id" property="cameraId"/>
-        <result column="cross_id" property="crossId"/>
-        <result column="url" property="url"/>
-        <result column="length" property="length"/>
-        <result column="time" property="time"/>
-        <result column="camera_number" property="camera_number"/>
-        <result column="name" property="name"/>
-    </resultMap>
-    <select id="findPage" resultMap="videoDTO" parameterType="com.example.springboota01.controller.dto.pageDTO.VideoPageDTO">
-        select * from video NATURAL JOIN camera NATURAL join `cross`
-        <!--动态添加where关键字-->
-        <where>
-            <if test="name!=null">
-                and name like &apos;%${name}%&apos;
-            </if>
-        </where>
-        order by time desc limit #{pageNum},#{pageSize}
+
+    <select id="findAll" resultType="com.example.springboota01.controller.dto.VideoDTO"></select>
+    <select id="findPage" resultType="com.example.springboota01.controller.dto.VideoDTO"></select>
+    <select id="findTotal" resultType="java.lang.Integer"></select>
+    <select id="getFlowData" resultType="com.example.springboota01.controller.vo.Counter">
+       select sum(person) as person,sum(car) as car,sum(truck) as truck,
+              sum(motorcycle) as motorcycle,sum(bus) as bus
+       from video join(`cross` natural join camera) using(camera_id)
+       where `cross`.name like &apos;%${name}%&apos;
+       and time between #{beginTime} and #{endTime}
     </select>
 
-    <select id="findTotal" resultType="integer" parameterType="com.example.springboota01.controller.dto.pageDTO.VideoPageDTO">
-        select count(*) from video natural join camera natural join `cross`
-        <!--动态添加where关键字-->
-        <where>
-            <if test="name!=null">
-                and name like &apos;%${name}%&apos;
-            </if>
-        </where>
-    </select>
-
-    <select id="findAll" resultMap="videoDTO" parameterType="String">
-        select * from video NATURAL JOIN camera NATURAL join `cross`
-        <!--动态添加where关键字-->
-        <where>
-            <if test="name!=null">
-                and name like &apos;%${name}%&apos;
-            </if>
-        </where>
-        order by name,camera_number
-    </select>
 </mapper>

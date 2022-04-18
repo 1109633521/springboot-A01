@@ -23,7 +23,12 @@ public class ConfirmDTO {
     private LocalDateTime confirmTime;
     private String number;
     private Boolean isConfirm;
+    private Boolean isDeal;
     private LocalDateTime createTime;
     private String userName;
-    private String context;
+    private String imageUrl;
+    private String fragmentUrl;
+
+    private Double centerLng;
+    private Double centerLat;
 }

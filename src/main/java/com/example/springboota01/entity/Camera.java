@@ -17,7 +17,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-  @TableName("camera")
+@TableName("camera")
 public class Camera implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,7 +31,7 @@ public class Camera implements Serializable {
       /**
      * 编号
      */
-      private Integer cameraNumber;
+      private String cameraNumber;
 
       /**
      * 外键
@@ -39,7 +39,7 @@ public class Camera implements Serializable {
       private Integer crossId;
 
 
-  public Camera(Integer cameraNumber, Integer crossId) {
+  public Camera(String cameraNumber, Integer crossId) {
     this.cameraNumber = cameraNumber;
     this.crossId = crossId;
   }

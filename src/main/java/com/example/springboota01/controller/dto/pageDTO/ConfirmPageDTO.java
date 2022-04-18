@@ -17,4 +17,6 @@ public class ConfirmPageDTO {
     private LocalDateTime beginTime;
     @ApiModelProperty(value = "终结时间-")
     private LocalDateTime endTime;
+    private String type;
+    private String number;
 }

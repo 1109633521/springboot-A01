@@ -4,6 +4,8 @@ package com.example.springboota01.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springboota01.mapper.CameraMapper;
 import io.swagger.annotations.Api;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.List;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/camera")
+@Transactional
 public class CameraController {
     @Resource
     private ICameraService cameraService;

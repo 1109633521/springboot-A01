@@ -1,24 +1,19 @@
 package com.example.springboota01.controller;
 
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.springboota01.common.Constants;
 import com.example.springboota01.common.Result;
-import com.example.springboota01.controller.dto.CatchDTO;
-import com.example.springboota01.entity.Car;
+import com.example.springboota01.controller.vo.CatchVO;
 import com.example.springboota01.mapper.CatchMapper;
 import io.swagger.annotations.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-
 import com.example.springboota01.service.ICatchService;
-import com.example.springboota01.entity.Catch;
 
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/catch")
 @Api(tags="catch类控制器：摄像头捕获管理")
+@Transactional
 public class CatchController {
     @Resource
     private ICatchService catchService;
@@ -48,9 +44,9 @@ public class CatchController {
             @ApiResponse(code = 500,message = "查询不到数据")
     })
     public Result findLastest() {
-        Integer pageNum = 1;
+        Integer pageNum = 0;
         Integer pageSize = 4;
-        List<CatchDTO> data = catchMapper.selectPage(pageNum,pageSize);
+        List<CatchVO> data = catchMapper.selectPage(pageNum,pageSize);
         Integer total = catchMapper.getTotal();
         Map<String,Object> res = new HashMap<>();
         res.put("data",data);

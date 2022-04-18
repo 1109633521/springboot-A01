@@ -15,6 +15,8 @@ import com.example.springboota01.mapper.CarMapper;
 import com.example.springboota01.service.ICarService;
 import io.swagger.annotations.*;
 import org.springframework.context.annotation.Bean;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags="blacklist类控制器：车辆黑名单管理")
 @RestController
 @RequestMapping("/blacklist")
+@Transactional
 public class BlacklistController {
     @Resource
     private IBlacklistService blacklistService;

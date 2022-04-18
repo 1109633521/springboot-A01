@@ -40,4 +40,11 @@ public class Blacklist implements Serializable {
       private LocalDateTime time;
 
 
+    public Blacklist(Integer carId, LocalDateTime now) {
+        this.carId = carId;
+        this.time = now;
+    }
+
+    public Blacklist() {
+    }
 }

@@ -14,4 +14,7 @@
             </if>
         </where>
     </select>
+    <select id="getCrossCount" resultType="com.example.springboota01.controller.vo.CrossCount">
+
+    </select>
 </mapper>

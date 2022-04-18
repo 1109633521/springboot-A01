@@ -44,7 +44,13 @@ public class Video implements Serializable {
      * 记录时间
      */
       private LocalDateTime time;
-
+      private Integer person;
+      private Integer car;
+      private Integer motorcycle;
+      private Integer bus;
+      private Integer truck;
+      private Integer fps;
+      private Integer totalFrames;
       /**
      * 视频地址
      */
@@ -59,4 +65,13 @@ public class Video implements Serializable {
         this.url = url;
       }
       public Video(){};
+      public void setData(Integer person,Integer car,Integer motorcycle,Integer bus,Integer truck,Integer fps,Integer totalFrames){
+        this.person = person;
+        this.car = car;
+        this.motorcycle = motorcycle;
+        this.bus = bus;
+        this.truck = truck;
+        this.fps = fps;
+        this.totalFrames = totalFrames;
+      }
 }

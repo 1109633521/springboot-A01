@@ -16,20 +16,35 @@
         <result column="is_confirm" property="isConfirm" />
         <result column="time" property="createTime" />
         <result column="user_name" property="userName" />
-        <result column="context" property="context" />
+        <result column="image_url" property="imageUrl" />
+        <result column="fragment_url" property="fragmentUrl" />
+        <result column="center_lng" property="centerLng"/>
+        <result column="center_lat" property="centerLat" />
+        <result column="is_deal" property="isDeal"/>
     </resultMap>
     <select id="findPage" resultMap="confirmDTO" parameterType="com.example.springboota01.controller.dto.pageDTO.ConfirmPageDTO">
         select distinct confirmation_id,incident_id,car_id,camera_number,incident.type,camera_id,`cross`.`name`,
-               confirm_time,car.number,is_confirm,incident.time,user_name,context
+        confirm_time,car.number,is_confirm,is_deal,incident.time,user_name,image.url as image_url,fragment.url as fragment_url,
+                        center_lng,center_lat
         from ((confirmation natural join incident) JOIN car using(car_id))
-            join (camera NATURAL join `cross`) using (camera_id),sys_user
+        left join (camera NATURAL join `cross`) using (camera_id) LEFT JOIN image using(confirmation_id)
+            left join fragment using (confirmation_id)
         <!--动态添加where关键字-->
         <where>
-            <if test="isConfirm!=null">
-                and confirmation.is_confirm = #{isConfirm}
+            <if test="isConfirm!=null
+
+
+">
+                and confirmation.is_confirm = ${isConfirm}
             </if>
             <if test="beginTime!=null and endTime!=null">
                 and incident.time between &apos;${beginTime}&apos; and &apos;${endTime}&apos;
+            </if>
+            <if test="type!=null">
+                and incident.type like &apos;%${type}%&apos;
+            </if>
+            <if test="number!=null">
+                and car.number like &apos;%${number}%&apos;
             </if>
         </where>
         order by incident.time desc limit #{pageNum},#{pageSize}
@@ -42,11 +57,17 @@
         join (camera NATURAL join `cross`) using (camera_id),sys_user
         <!--动态添加where关键字-->
         <where>
-            <if test="isConfirm != null">
-                and confirmation.is_confirm = #{isConfirm}
+            <if test="isConfirm!=null">
+                and confirmation.is_confirm = ${isConfirm}
             </if>
             <if test="beginTime != null and endTime != null">
                 and incident.time between  &apos;${beginTime}&apos; and  &apos;${endTime}&apos;
+            </if>
+            <if test="type!=null">
+                and incident.type like &apos;%${type}%&apos;
+            </if>
+            <if test="number!=null">
+                and car.number like &apos;%${number}%&apos;
             </if>
         </where>
     </select>

@@ -21,7 +21,7 @@ public class GodeGenerator {
                     builder.author("luoxu") // 设置作者
                             //.enableSwagger() // 开启 swagger 模式
                             .fileOverride() // 覆盖已生成文件
-                            .outputDir("C:\\Users\\86158\\IdeaProjects\\springboot-A01\\src\\main\\java\\"); // 指定输出目录
+                            .outputDir("C:\\Users\\86158\\IdeaProjects\\springboot-A01\\src\\main\\java2\\"); // 指定输出目录
                 })
                 .packageConfig(builder -> {
                     builder.parent("com.example.springboota01") // 设置父包名
@@ -34,7 +34,7 @@ public class GodeGenerator {
                     builder.controllerBuilder().enableHyphenStyle() // 开启驼峰转连字符
                             .enableRestStyle(); //开启生成@RestController控制器
 
-                    builder.addInclude("files") // 设置需要生成的表名
+                    builder.addInclude("video") // 设置需要生成的表名
                             .addTablePrefix("", ""); // 设置过滤表前缀
                 })
                 //.templateEngine(new FreemarkerTemplateEngine()) // 使用Freemarker引擎模板，默认的是Velocity引擎模板
